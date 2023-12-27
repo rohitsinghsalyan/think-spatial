@@ -1,0 +1,22 @@
+FROM tensorflow/tensorflow:2.10.1-gpu
+
+RUN rm /etc/apt/sources.list.d/cuda.list
+
+RUN apt-get update
+RUN apt-get install -y unzip graphviz curl musescore3
+
+RUN pip install --upgrade pip
+
+WORKDIR /app
+
+COPY ./requirements.txt /app
+RUN pip install -r /app/requirements.txt
+
+# Hack to get around tensorflow-io issue - https://github.com/tensorflow/io/issues/1755
+RUN pip install tensorflow-io
+RUN pip uninstall -y tensorflow-io
+
+COPY /notebooks/. /app/notebooks
+COPY /scripts/. /app/scripts
+
+ENV PYTHONPATH="${PYTHONPATH}:/app"
